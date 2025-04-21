@@ -591,5 +591,31 @@ namespace ShareX.HelpersLib
 
             return hWnd;
         }
+
+        // WARNING: This function relies on the internal layout of the avifDecoder struct
+        // matching the AvifDecoderPublicMembers struct definition in C#.
+        // This is fragile and may break if the libavif library is updated
+        // and the struct layout changes.
+        internal static IntPtr AvifDecoderGetImage(IntPtr decoder)
+        {
+            if (decoder == IntPtr.Zero)
+            {
+                DebugHelper.WriteLine("avifDecoderGetImage called with null decoder pointer.");
+                return IntPtr.Zero;
+            }
+
+            try
+            {
+                // Marshal the public part of the structure from the native pointer
+                AvifDecoderPublicMembers decoderStruct = Marshal.PtrToStructure<AvifDecoderPublicMembers>(decoder);
+                // Return the image pointer
+                return decoderStruct.image;
+            }
+            catch (Exception ex)
+            {
+                DebugHelper.WriteException(ex, "Failed to marshal AvifDecoderPublicMembers struct in avifDecoderGetImage.");
+                return IntPtr.Zero;
+            }
+        }
     }
 }
