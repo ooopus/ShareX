@@ -2408,28 +2408,24 @@ namespace ShareX.HelpersLib
 
         private static Bitmap CreateArgbBitmap(Image sourceImage)
         {
-            // Use original bitmap if possible and already in correct format
-            if (sourceImage is Bitmap sourceBitmap && 
-                sourceBitmap.PixelFormat == PixelFormat.Format32bppArgb)
-            {
-                return sourceBitmap;
-            }
-
-            // Create a new bitmap with 32bpp ARGB format
+            // Always create a new 32bpp ARGB format bitmap to avoid releasing the original image.
             var resultBitmap = new Bitmap(sourceImage.Width, sourceImage.Height, PixelFormat.Format32bppArgb);
+
+            resultBitmap.SetResolution(sourceImage.HorizontalResolution, sourceImage.VerticalResolution);
+
             using (var g = Graphics.FromImage(resultBitmap))
             {
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.CompositingQuality = CompositingQuality.HighQuality;
-                g.CompositingMode = CompositingMode.SourceOver;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+
                 g.DrawImage(sourceImage, 0, 0, sourceImage.Width, sourceImage.Height);
             }
-            
+
             return resultBitmap;
         }
-
         private static IntPtr CreateAvifImage(Bitmap bitmap, out BitmapData bmpData)
         {
             int width = bitmap.Width;
